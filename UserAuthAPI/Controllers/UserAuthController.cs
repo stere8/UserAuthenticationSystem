@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using UserAuthAPI.Models;
+using UserAuthAPI.Services;
 
 namespace UserAuthAPI.Controllers
 {
@@ -12,9 +13,13 @@ namespace UserAuthAPI.Controllers
 	public class UserAuthController : ControllerBase
 	{
 		private readonly UserAuthDbContext _context;
-		public UserAuthController(UserAuthDbContext context)
+		private readonly JwtTokenService _jwtTokenService;
+		private byte[] storedHash;
+		private byte[] storedSalt;
+		public UserAuthController(UserAuthDbContext context, JwtTokenService jwtTokenService)
 		{
 			_context = context;
+			_jwtTokenService = jwtTokenService;
 		}
 
 		[HttpPost("register")] // Route for registration requests
@@ -25,32 +30,34 @@ namespace UserAuthAPI.Controllers
 				return BadRequest(ModelState);
 			}
 
-			if (_context.Users.Any(user => user.Username == userModel.Username))
+			if (_context.Users.Any(user => user.Username == userModel.Username || user.Email == userModel.Email))
 			{
-				return BadRequest("Registration failed, Username already exists. Please try again.");
+				return BadRequest("Registration failed, user already exists. Please try again.");
 			}
 
-
-			if (_context.Users.Any(user => user.Email == userModel.Email))
+			if (userModel.Password != userModel.ConfirmPassword)
 			{
-				return BadRequest("Registration failed, Email already in use. Please try again.");
+				return BadRequest("Passwords must match");
 			}
 
-			CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
+			CreatePasswordHash(userModel.Password);
 
-			var user = new User
+			if (storedHash != null && storedSalt != null)
 			{
-				Username = userModel.Username,
-				Email = userModel.Email,
-				PasswordHash = passwordHash,
-				PasswordSalt = passwordSalt
-			};
+				var user = new User
+				{
+					Username = userModel.Username,
+					Email = userModel.Email,
+					PasswordHash = storedHash,
+					PasswordSalt = storedSalt
+				};
 
-			_context.Users.Add(user);
-			await _context.SaveChangesAsync();
+				_context.Users.Add(user);
+				await _context.SaveChangesAsync();
+
+			}
 
 			return Ok();
-
 		}
 
 		[HttpPost("login")]
@@ -69,19 +76,21 @@ namespace UserAuthAPI.Controllers
 				return Unauthorized("Incorrect password");
 			}
 
+			var jwt = _jwtTokenService.GenerateJwtToken(user);
+
 			// 3. JWT Generation
 
-			return Ok(new { token = "your_generated_jwt_token" });
+			return Ok(new { token = jwt });
 		}
 
 
 
-		public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+		public void CreatePasswordHash(string password)
 		{
 			using (var hmac = new HMACSHA512())
 			{
-				passwordSalt = hmac.Key;
-				passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+				storedSalt = hmac.Key;
+				storedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 			}
 		}
 

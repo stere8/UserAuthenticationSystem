@@ -3,8 +3,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using UserAuthAPI.Models;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using UserAuthAPI.Services;
 
 namespace UserAuthAPI
 {
@@ -17,37 +17,29 @@ namespace UserAuthAPI
 			// Add services to the container.
 
 			builder.Services.AddControllers();
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
-
+			builder.Services.AddScoped<JwtTokenService>();
 			builder.Services.AddDbContext<UserAuthDbContext>(options =>
 				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 			builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
 						ValidateIssuerSigningKey = true,
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("SecretKey"))),
+						IssuerSigningKey =
+							new SymmetricSecurityKey(
+								Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("SecretKey"))),
 						ValidateIssuer = false,
 						ValidateAudience = false
 					};
 				});
 
-
 			var app = builder.Build();
-
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
-				
-			}
 
 			app.UseHttpsRedirection();
 
 			app.UseAuthorization();
-
 
 			app.MapControllers();
 
