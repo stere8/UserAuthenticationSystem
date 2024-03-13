@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UserAuthAPI.Models
+namespace UserAuthServer.Models
 {
-	public class UserRegistrationModel
+	public class User
 	{
+		public int Id { get; set; }
+
 		[Required]
 		public string Username { get; set; }
 
@@ -11,9 +13,7 @@ namespace UserAuthAPI.Models
 		[EmailAddress]
 		public string Email { get; set; }
 
-		[Required]
-		public string Password { get; set; }
-		[Required]
-		public string ConfirmPassword { get; set; }
+		public byte[] PasswordHash { get; set; }
+		public byte[] PasswordSalt { get; set; }
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace UserAuthAPI.Models
+namespace UserAuthServer.Models
 {
 	public class UserAuthDbContext : DbContext
 	{

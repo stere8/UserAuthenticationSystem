@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using UserAuthAPI.Models;
-using UserAuthAPI.Services;
+using UserAuthServer.Models;
+using UserAuthServer.Service;
 
-namespace UserAuthAPI.Controllers
+namespace UserAuthServer.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
@@ -63,12 +61,14 @@ namespace UserAuthAPI.Controllers
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] UserLoginModel userModel)
 		{
+			var f=_context.Users.Where(u => u.Username == userModel.Login || u.Email == userModel.Login).ToList();
 			// 1. Retrieve User
-			var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userModel.Login || u.Email == userModel.Login);
-			if (user == null)
+			if (!f.Any())
 			{
 				return NotFound("User not found"); // Consider security implications 
 			}
+
+			var user =f.First();
 
 			// 2. Verify Password
 			if (!VerifyPasswordHash(userModel.Password, user.PasswordHash, user.PasswordSalt))

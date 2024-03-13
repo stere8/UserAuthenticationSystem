@@ -1,10 +1,12 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using UserAuthAPI.Models; // Assuming your User model is here
+using Microsoft.IdentityModel.Tokens;
+using UserAuthServer.Models;
 
-namespace UserAuthAPI.Services
+// Assuming your User model is here
+
+namespace UserAuthServer.Service
 {
 	public class JwtTokenService
 	{
