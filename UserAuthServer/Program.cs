@@ -20,34 +20,34 @@ namespace UserAuthServer
 			builder.Services.AddScoped<JwtTokenService>();
 			builder.Services.AddDbContext<UserAuthDbContext>(options =>
 			  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-			builder.Services.AddCors(options =>
-				options.AddPolicy(name: "MyAllowSpecificOrigins",
-						builder =>
-						{
-							builder.WithOrigins("http://localhost:5173") // Replace with your Vue development server's origin
-												 .AllowAnyHeader()
-						 .AllowAnyMethod();
-						}));
+			//builder.Services.AddCors(options =>
+			//	options.AddPolicy(name: "MyAllowSpecificOrigins",
+			//			builder =>
+			//			{
+			//				builder.WithOrigins("http://localhost/") // Replace with your Vue development server's origin
+			//									 .AllowAnyHeader()
+			//			 .AllowAnyMethod();
+			//			}));
 			
-			builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-			  .AddJwtBearer(options =>
-			  {
-				  options.TokenValidationParameters = new TokenValidationParameters
-				  {
-					  ValidateIssuerSigningKey = true,
-					  IssuerSigningKey =
-				new SymmetricSecurityKey(
-				  Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("JWTSecretKey"))),
-					  ValidateIssuer = false,
-					  ValidateAudience = false
-				  };
-			  });
+			//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			//  .AddJwtBearer(options =>
+			//  {
+			//	  options.TokenValidationParameters = new TokenValidationParameters
+			//	  {
+			//		  ValidateIssuerSigningKey = true,
+			//		  IssuerSigningKey =
+			//	new SymmetricSecurityKey(
+			//	  Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("JWTSecretKey"))),
+			//		  ValidateIssuer = false,
+			//		  ValidateAudience = false
+			//	  };
+			//  });
 
 			var app = builder.Build();
 
 			app.UseHttpsRedirection();
 
-			app.UseCors("MyAllowSpecificOrigins");
+			//app.UseCors("MyAllowSpecificOrigins");
 
 			app.UseAuthorization();
 

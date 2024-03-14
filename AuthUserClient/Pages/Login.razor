@@ -1,0 +1,85 @@
+﻿@page "/login"
+@using System.Text
+@using Microsoft.AspNetCore;
+@using Microsoft.AspNetCore.Http.Features.Authentication;
+@using Newtonsoft.Json
+@using System.Dynamic
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">AuthUserClient</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Welcome
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Register">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Register View
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Login">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login View (active)
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<div class="container">
+    <h1 class="display-4">Login</h1>
+
+    <form @onsubmit="LoginTask">
+        <div class="mb-3">
+            <label for="username" class="form-label">Email address</label>
+            <input type="input" class="form-control" @bind="UsernameOrLogin" name="login" placeholder="Enter email">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" @bind="Password" name="password" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string UsernameOrLogin {get; set; }
+    private string Password { get; set; }
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
+
+@functions {
+    public async Task LoginTask()
+    {
+        var loginData = new { email = UsernameOrLogin, password = Password };
+        var jsonData = new StringContent(JsonConvert.SerializeObject(loginData), Encoding.UTF8, "application/json");
+
+        using var httpClient = new HttpClient();
+        var response = await  httpClient.PostAsJsonAsync("http://127.0.0.1:5026/api/UserAuth/login", jsonData); // Replace '/api/login' with your actual API endpoint
+
+        // Handle API response
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle successful login (e.g., redirect)
+        }
+        else
+        {
+            // Handle login failure
+        }
+    }
+}
